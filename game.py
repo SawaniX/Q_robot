@@ -1,7 +1,4 @@
-import numpy as np
 import random
-import time
-import os
 import pygame
 
 width, height = 1100, 800           # width and height of the app window
@@ -20,7 +17,7 @@ robot_right = pygame.transform.rotate(robot, 90)
 robot_left = pygame.transform.rotate(robot, -90)
 
 move_distance = 15          # distance that robot moves in one move in cm
-inaccuracy = 0               # inaccuracy of sensors in cm
+inaccuracy = 3               # inaccuracy of sensors in cm
 
 l_dist, t_dist = 200, 200# odleglosc sciany pomieszczenia od lewej i gornej krawedzi okna [w rzeczywistej odleglosci cm]
 room_width, room_height = 150, 150      # real room dimensions in cm
@@ -67,11 +64,14 @@ def env(pos, robot_direction):
     pygame.draw.line(screen, white, (l_dist * scale + room_width * scale - exit_wall_width * scale, t_dist * scale),
                      (l_dist * scale + room_width * scale, t_dist * scale))             # top wall of the room
 
+    # obstacles
+    pygame.draw.rect(screen, white, (l_dist * scale, t_dist * scale + 150, 150, 30))
+
     pygame.display.update()         # update screen
 
 
 def forward(pos, robot_direction):
-    ran = random.randint(-inaccuracy, inaccuracy)          # inaccuracy of encoders/sensors
+    ran = random.randint(-inaccuracy * scale, inaccuracy * scale)          # inaccuracy of encoders/sensors
     if robot_direction == 0:
         pos.y += move_distance * scale + ran
     elif robot_direction == 1:
@@ -84,7 +84,7 @@ def forward(pos, robot_direction):
 
 
 def backward(pos, robot_direction):
-    ran = random.randint(-inaccuracy, inaccuracy)          # inaccuracy of encoders/sensors
+    ran = random.randint(-inaccuracy * scale, inaccuracy * scale)          # inaccuracy of encoders/sensors
     if robot_direction == 0:
         pos.y -= move_distance * scale + ran
     elif robot_direction == 1:
@@ -153,6 +153,7 @@ def draw_distances(up, down, left_edge, right_edge, top, low, left, right):     
 
 def measure(pos, robot_direction):      # measure distance from the nearest wall, simulation of ultrasonic sensors in real robot
     up, down, left_edge, right_edge = find_center(pos, robot_direction)
+    up_dist, down_dist, right_dist, left_dist = 0, 0, 0, 0
 
     margin = 36
 
@@ -203,7 +204,7 @@ def measure(pos, robot_direction):      # measure distance from the nearest wall
         draw_distances(up, down, left_edge, right_edge, l_dist, r_dist, back_dist, front_dist)
 
     pygame.display.update()
-    return front_dist, back_dist, r_dist, l_dist
+    return front_dist / scale, back_dist / scale, r_dist / scale, l_dist / scale
 
 
 def main():
