@@ -18,7 +18,7 @@ rewards = []
 # ======================================================================================================================
 
 total_episodes = 50000
-learning_rate = 0.3
+learning_rate = 0.8
 max_steps = 20
 gamma = 0.95
 
@@ -119,13 +119,6 @@ def train(epsilon):
 
             state = new_state
 
-            # if pos.y + 52 < 400:
-            #     f, b, r, l = game.measure(pos, robot_direction)
-            #     print(f, b, r, l)
-            #     print(f / 5, b / 5, r / 5, l / 5)
-            #     print(reward, pos.x, pos.y)
-            #     input()
-
             if done:
                 break
 
@@ -135,13 +128,54 @@ def train(epsilon):
         if total_rewards > 0:
             d += 1
         if (episode + 1) % 1000 == 0:
-            print(episode, d)
+            print("Episode: " + str(episode) + ", success: " + str(d) + ", accuracy: " + str(d * 100 / 1000))
             d = 0
 
     print("Score: " + str(sum(rewards) / total_episodes))
     np.save('data', qtab)
 
 
+def test(epsilon):
+    qtab = np.load('data.npy')          # load q matrix from file
+
+    episodes = 1000
+    count = 0
+
+    for episode in range(episodes):
+        pos = game.pygame.Rect(game.robot_start_position[0], game.robot_start_position[1], game.robot_width,
+                               game.robot_length)
+        robot_direction = 0  # direction of the front of the robot: 0-down, 1-up, 2-left, 3-right
+
+        game.env(pos, robot_direction)
+
+        front, back, right, left = game.measure(pos, robot_direction)
+        state = tuple([int(front / scale), int(back / scale), int(right / scale), int(left / scale)])
+
+        done = False
+        total_rewards = 0
+
+        for step in range(max_steps):
+            action = np.argmax(qtab[state])
+
+            pos, robot_direction = take_a_step(action, pos, robot_direction)
+
+            new_state, reward, done = perform(pos, robot_direction)  # get new state, reward
+
+            game.env(pos, robot_direction)
+
+            total_rewards = total_rewards + reward
+
+            if done:
+                break
+
+            state = new_state
+
+        if total_rewards > 0:
+            count += 1
+    print("Number of success: " + str(count) + "/" + str(episodes) + ". Accuracy: " + str(count * 100 / episodes))
+
+
 if __name__ == "__main__":
     train(epsilon)
+    # test(epsilon)
 
