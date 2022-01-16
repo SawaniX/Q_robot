@@ -19,7 +19,7 @@ robot_left = pygame.transform.rotate(robot, -90)
 move_distance = 15          # distance that robot moves in one move in cm
 inaccuracy = 3               # inaccuracy of sensors in cm
 
-l_dist, t_dist = 200, 200# odleglosc sciany pomieszczenia od lewej i gornej krawedzi okna [w rzeczywistej odleglosci cm]
+l_dist, t_dist = 200, 200   # wall distance from lef and upper edge of the window in cm
 room_width, room_height = 150, 150      # real room dimensions in cm
 outside_wall_thick = 10         # thickness of the outside walls
 exit_width = 30         # real width of the doors in cm
@@ -41,7 +41,18 @@ def rotate_robot(pos, robot_direction):         # draw robot in right front dire
         screen.blit(robot_right, (pos.x - 10, pos.y + 10))
 
 
-def env(pos, robot_direction):
+def env(pos, robot_direction, map):
+    maps = [[(l_dist * scale, t_dist * scale + 150, 150, 30), (0, 0, 0, 0)],
+            [(l_dist * scale + 60, t_dist * scale + 100, 30, 30), (l_dist * scale + 200, t_dist * scale + 150, 30, 50)],
+            [(l_dist * scale + 80, t_dist * scale + 130, 60, 30), (l_dist * scale + 200, t_dist * scale + 200, 30, 50)],
+            [(l_dist * scale + 40, t_dist * scale + 90, 100, 30), (l_dist * scale + 150, t_dist * scale + 220, 30, 50)],
+            [(l_dist * scale + 100, t_dist * scale + 150, 30, 30), (l_dist * scale + 200, t_dist * scale + 50, 30, 50)],
+            [(l_dist * scale + 140, t_dist * scale + 100, 160, 30), (0, 0, 0, 0)],
+            [(l_dist * scale + 91, t_dist * scale, 30, 80), (l_dist * scale + 140, t_dist * scale + 150, 80, 50)],
+            [(l_dist * scale + 91, t_dist * scale, 30, 80), (l_dist * scale + 180, t_dist * scale + 200, 20, 80)],
+            [(0, 0, 0, 0), (0, 0, 0, 0)],
+            [(l_dist * scale + 160, t_dist * scale + 160, 80, 30), (l_dist * scale + 100, t_dist * scale + 100, 30, 50)],
+            [(l_dist * scale, t_dist * scale + 100, 175, 20), (l_dist * scale + 150, t_dist * scale + 230, 30, 70)]]
     screen.fill(black)            # refresh screen
 
     rotate_robot(pos, robot_direction)  # draw robot in right front direction depends on robot_direction var
@@ -65,7 +76,8 @@ def env(pos, robot_direction):
                      (l_dist * scale + room_width * scale, t_dist * scale))             # top wall of the room
 
     # obstacles
-    pygame.draw.rect(screen, white, (l_dist * scale, t_dist * scale + 150, 150, 30))
+    pygame.draw.rect(screen, white, maps[map][0])
+    pygame.draw.rect(screen, white, maps[map][1])
 
     pygame.display.update()         # update screen
 
@@ -208,6 +220,8 @@ def measure(pos, robot_direction):      # measure distance from the nearest wall
 
 
 def main():
+    map = 6
+
     pos = pygame.Rect(robot_start_position[0], robot_start_position[1], robot_width, robot_length)
     robot_direction = 0  # direction of the front of the robot: 0-down, 1-up, 2-left, 3-right
 
@@ -231,7 +245,7 @@ def main():
                     robot_direction = right(robot_direction)
                     forward(pos, robot_direction)
 
-        env(pos, robot_direction)
+        env(pos, robot_direction, map)
         print(measure(pos, robot_direction))
     pygame.quit()
 
