@@ -15,3 +15,5 @@ I implemented Q learning algorithm for this problem. Source code is located in t
 ### Usage:
 
 Trained Q-learning matrix can be used in real mobile robot for finding path to the exit of the room.
+
+[![Watch the video](https://img.youtube.com/vi/ATBKNu4nOZU/maxresdefault.jpg)](https://www.youtube.com/watch?v=ATBKNu4nOZU)
